@@ -27,6 +27,10 @@ public final class LoginHandler {
         this.gui = gui;
     }
 
+    /**
+     * Logs a user in from the information in this instance's GUI
+     * @return 
+     */
     public boolean login() {
         User user = User.getUserByName(gui.loginNameField.getText());
         if (user != null && (!String.valueOf(gui.loginPasswordField.getPassword()).trim().isEmpty() && !gui.loginNameField.getText().trim().isEmpty())) {
@@ -52,8 +56,11 @@ public final class LoginHandler {
                         SwingUtilities.invokeLater(()-> {
                             gui.dispose();
                         });
-                    } catch (IOException | MessagingException ex) {
-                        Logger.getLogger(LoginHandler.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (MessagingException ex) {
+                        System.out.println("Failed to send email...");
+                        SwingUtilities.invokeLater(()-> {
+                            gui.dispose();
+                        });
                     }
                 }
                 return false;

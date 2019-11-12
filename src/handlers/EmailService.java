@@ -1,5 +1,8 @@
 package handlers;
 
+import com.sun.mail.util.MailConnectException;
+import guiComponents.InputButton;
+import guiComponents.InputField;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -11,10 +14,13 @@ import java.util.Properties;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
 
 /*
-    @author Daniel Allen
-    9-Nov-2019
+ @author Daniel Allen
+ 9-Nov-2019
  */
 public final class EmailService {
 
@@ -24,14 +30,23 @@ public final class EmailService {
     private static BufferedReader br;
     private static OutputStream os;
 
-    public static void sendEmail(String recipient, String subject, String content) throws IOException, MessagingException {
+    /**
+     * Sends a user an email
+     *
+     * @param recipient the recipient of the email
+     * @param subject the subject of the email
+     * @param content the content or body of the email
+     * @throws MailConnectException
+     * @throws MessagingException
+     */
+    public static void sendEmail(String recipient, String subject, String content) throws MessagingException, MailConnectException{
         Properties properties = System.getProperties();
         String host = "smtp.gmail.com";
         properties.put("mail.smtp.starttls.enable", "true");
         properties.put("mail.smtp.host", host);
         properties.put("mail.smtp.user", email);
         properties.put("mail.smtp.password", password);
-        properties.put("mail.smtp.port", "587");
+        properties.put("mail.smtp.port", "25");
         properties.put("mail.smtp.auth", "true");
 
         Session session = Session.getDefaultInstance(properties);

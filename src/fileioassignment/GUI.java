@@ -36,10 +36,10 @@ public class GUI extends JFrame {
     //login components
     JLabel loginNameLabel = new JLabel("Username:");
     public JLabel loginNameErrorLabel = new JLabel("");
-    public InputField loginNameField = new InputField(100, 25, "Enter username here");
+    public InputField loginNameField = new InputField(200, 25, "Enter username here");
     JLabel loginPasswordLabel = new JLabel("Password:");
     public JLabel loginPasswordErrorLabel = new JLabel("");
-    public InputPasswordField loginPasswordField = new InputPasswordField(100, 25, "Enter password here");
+    public InputPasswordField loginPasswordField = new InputPasswordField(200, 25, "Enter password here");
     InputButton loginButton = new InputButton(60, 25) {
         @Override
         public void onClick() {
@@ -109,12 +109,13 @@ public class GUI extends JFrame {
     JLabel registerFirstNameLabel = new JLabel("Enter your first name:");
     public JLabel registerFirstNameErrorLabel = new JLabel("");
     //add restriction to prevent spaces. TODO: rewrite InputField to add a "alphanumeric only" option instead
-    public InputField registerFirstNameField = new InputField(100, 25, "Enter first name here").addRestriction(' ', 0);
+    public InputField registerFirstNameField = new InputField(200, 25, "Enter first name here").addRestriction(' ', 0);
 
     JLabel registerLastNameLabel = new JLabel("Enter your last name:");
     public JLabel registerLastNameErrorLabel = new JLabel("");
     //add restriction to prevent spaces. TODO: rewrite InputField to add a "alphanumeric only" option instead
-    public InputField registerLastNameField = new InputField(100, 25, "Enter last name here").addRestriction(' ', 0);;
+    public InputField registerLastNameField = new InputField(200, 25, "Enter last name here").addRestriction(' ', 0);
+    ;
     InputButton registerButton = new InputButton(60, 25) {
         @Override
         public void onClick() {
@@ -170,6 +171,43 @@ public class GUI extends JFrame {
         gbl.rowWeights = new double[]{1};
     }
 
+    /**
+     * private void initLogin() { //configure the loginPanel and its components
+     * loginPanel.setSize(this.getSize()); GridBagLayout loginLayout = new
+     * GridBagLayout(); loginPanel.setLayout(loginLayout); GridBagConstraints
+     * loginConstraints = new GridBagConstraints(); loginConstraints.insets =
+     * new Insets(5, 0, 0, 10); Font errorFont = new Font("Dialog", (Font.BOLD |
+     * Font.ITALIC), 9);
+     *
+     * loginConstraints.gridx = 0; loginConstraints.gridy = 0; JLabel header =
+     * new JLabel("Login"); header.setFont(new Font("Dialog", (Font.BOLD), 25));
+     * loginPanel.add(header, loginConstraints); loginConstraints.gridy = 1;
+     * loginConstraints.gridx = 2;
+     *
+     * loginNameErrorLabel.setFont(errorFont);
+     * loginNameErrorLabel.setForeground(Color.RED);
+     * loginPanel.add(loginNameErrorLabel, loginConstraints);
+     *
+     * loginConstraints.gridx = 4;
+     *
+     * loginPasswordErrorLabel.setFont(errorFont);
+     * loginPasswordErrorLabel.setForeground(Color.RED);
+     * loginPanel.add(loginPasswordErrorLabel, loginConstraints);
+     *
+     * loginConstraints.gridx = 1; loginConstraints.gridy = 2;
+     * loginPanel.add(loginNameLabel, loginConstraints);
+     * loginConstraints.gridx++; loginPanel.add(loginNameField,
+     * loginConstraints);
+     *
+     * loginConstraints.gridx++; loginPanel.add(loginPasswordLabel,
+     * loginConstraints); loginConstraints.gridx++;
+     * loginPanel.add(loginPasswordField, loginConstraints);
+     * loginConstraints.gridy = 3; loginConstraints.gridx = 2;
+     * loginPanel.add(findNameButton, loginConstraints); loginConstraints.gridx
+     * = 4; loginPanel.add(resetButton, loginConstraints);
+     * loginConstraints.gridy = 4; loginConstraints.gridx = 3;
+     * loginPanel.add(loginButton, loginConstraints); }
+     */
     private void initLogin() {
         //configure the loginPanel and its components
         loginPanel.setSize(this.getSize());
@@ -177,9 +215,14 @@ public class GUI extends JFrame {
         loginPanel.setLayout(loginLayout);
         GridBagConstraints loginConstraints = new GridBagConstraints();
         loginConstraints.insets = new Insets(5, 0, 0, 10);
-
         Font errorFont = new Font("Dialog", (Font.BOLD | Font.ITALIC), 9);
+
+        loginConstraints.gridx = 2;
         loginConstraints.gridy = 0;
+        JLabel header = new JLabel("Login");
+        header.setFont(new Font("Dialog", (Font.BOLD), 25));
+        loginPanel.add(header, loginConstraints);
+        loginConstraints.gridy = 1;
         loginConstraints.gridx = 1;
 
         loginNameErrorLabel.setFont(errorFont);
@@ -193,7 +236,7 @@ public class GUI extends JFrame {
         loginPanel.add(loginPasswordErrorLabel, loginConstraints);
 
         loginConstraints.gridx = 0;
-        loginConstraints.gridy = 1;
+        loginConstraints.gridy = 2;
         loginPanel.add(loginNameLabel, loginConstraints);
         loginConstraints.gridx++;
         loginPanel.add(loginNameField, loginConstraints);
@@ -202,12 +245,12 @@ public class GUI extends JFrame {
         loginPanel.add(loginPasswordLabel, loginConstraints);
         loginConstraints.gridx++;
         loginPanel.add(loginPasswordField, loginConstraints);
-        loginConstraints.gridy++;
+        loginConstraints.gridy = 3;
         loginConstraints.gridx = 1;
         loginPanel.add(findNameButton, loginConstraints);
         loginConstraints.gridx = 3;
         loginPanel.add(resetButton, loginConstraints);
-        loginConstraints.gridy = 3;
+        loginConstraints.gridy = 4;
         loginConstraints.gridx = 2;
         loginPanel.add(loginButton, loginConstraints);
     }
@@ -222,12 +265,13 @@ public class GUI extends JFrame {
 
         Font errorFont = new Font("Dialog", (Font.BOLD | Font.ITALIC), 9);
 
-        registerConstraints.gridx = 3;
-
-        registerConstraints.gridx = 5;
-
-        registerConstraints.gridx = 0;
+        registerConstraints.gridx = 2;
         registerConstraints.gridy = 0;
+        JLabel header = new JLabel("Register");
+        header.setFont(new Font("Dialog", (Font.BOLD), 25));
+        registerPanel.add(header, registerConstraints);
+        registerConstraints.gridx = 0;
+        registerConstraints.gridy = 1;
         registerPanel.add(registerNameLabel, registerConstraints);
         registerConstraints.gridx++;
         registerPanel.add(registerNameField, registerConstraints);

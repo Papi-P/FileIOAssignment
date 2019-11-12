@@ -10,14 +10,16 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /*
+    Was utility class to verify register information. Replaced with anonymous members and now just reads the bad passwords from the badpasswords.txt file.
     @author Daniel Allen
     9-Nov-2019
  */
 public class Verify {
-    protected static ArrayList<String> badPasswords = new ArrayList<>();
+    protected final static ArrayList<String> badPasswords = new ArrayList<>();
 
     static {
         File f = new File("src\\fileioassignment\\badpasswords.txt");
+        //create the file if it doesn't exist
         if (!f.exists()) {
             f.getParentFile().mkdirs();
             try {
@@ -28,6 +30,7 @@ public class Verify {
         }
         if (f.exists()) {
             try {
+                //read each line from the file and add it to the ArrayList
                 BufferedReader br = new BufferedReader(new FileReader(f));
                 String line = "";
                 while ((line = br.readLine()) != null) {

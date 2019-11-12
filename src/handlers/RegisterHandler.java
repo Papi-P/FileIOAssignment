@@ -32,6 +32,10 @@ public final class RegisterHandler {
     //0-9 = 48-57
     //A-Z = 65-90
     //a-z = 97-122
+    /**
+     * Registers a user from the information in this instance's GUI
+     * @return 
+     */
     public boolean register() {
         String name = gui.registerNameField.getText(),
                 email = gui.registerEmailField.getText(),
@@ -84,6 +88,7 @@ public final class RegisterHandler {
                     emailvalid = false;
                 }
                 if (c == 46) {
+                    //prevent multiple periods in a row
                     if (hasPeriod) {
                         if (email.toCharArray()[i - 1] == 46) {
                             gui.registerEmailErrorLabel.setText("Periods cannot be sequenced");
@@ -91,6 +96,7 @@ public final class RegisterHandler {
                             emailvalid = false;
                         }
                     }
+                    //prevent a period right after @
                     if (hasAt) {
                         if (email.toCharArray()[i - 1] == 64) {
                             gui.registerEmailErrorLabel.setText("Malformed domain");
@@ -101,11 +107,13 @@ public final class RegisterHandler {
                     }
                 }
                 if (c == 64) {
+                    //prevent multiple @ characters
                     if (hasAt) {
                         gui.registerEmailErrorLabel.setText("Use only 1 '@'");
                         gui.registerEmailField.setBorderColor(Color.RED);
                         emailvalid = false;
                     }
+                    //prevent @ right after a period
                     if (i > 0 && email.toCharArray()[i - 1] == 46) {
                         gui.registerEmailErrorLabel.setText("Malformed local-part");
                         gui.registerEmailField.setBorderColor(Color.RED);
@@ -114,6 +122,7 @@ public final class RegisterHandler {
                     hasAt = true;
                 }
             }
+            //prevent certain invalid email formats
             if (!hasAt) {
                 gui.registerEmailErrorLabel.setText("Missing '@'");
                 gui.registerEmailField.setBorderColor(Color.RED);
@@ -205,6 +214,7 @@ public final class RegisterHandler {
             if (success) {
                 try {
                     User.addUserToFile(user);
+                    //clear and reset all register fields
                     gui.registerNameField.setText("");
                     gui.registerNameField.setBorderColor(Color.BLACK);
                     gui.registerEmailField.setText("");
