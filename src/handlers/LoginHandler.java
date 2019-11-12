@@ -36,7 +36,7 @@ public final class LoginHandler {
 
             if (Encrypt.sha256(String.valueOf(gui.loginPasswordField.getPassword())).equals(user.getEncryptedPassword())) {
                 user.success();
-                JOptionPane.showMessageDialog(gui, "Welcome, " + user.getName(), "Program that does stuff", JOptionPane.PLAIN_MESSAGE);
+                JOptionPane.showMessageDialog(gui, "Welcome, " + user.getUsername(), "Program that does stuff", JOptionPane.PLAIN_MESSAGE);
                 gui.loginPasswordErrorLabel.setText("");
                 gui.loginPasswordField.setBorderColor(Color.BLACK);
                 return true;
@@ -47,7 +47,7 @@ public final class LoginHandler {
                 if (user.getAttempts() >= 4) {
                     try {
                         //send the owner of the account an email informing them of the attempt
-                        EmailService.sendEmail(user.getEmail(), "Failed Login Attempts", "<b>There have been <u>" + user.getAttempts() + "</u> failed login attempts on your account, \"" + user.getName() + "\". </b><br><p>If you have forgotten your password you can reset it in the program.</p>");
+                        EmailService.sendEmail(user.getEmail(), "Failed Login Attempts", "<b>There have been <u>" + user.getAttempts() + "</u> failed login attempts on your account, \"" + user.getUsername() + "\". </b><br><p>If you have forgotten your password you can reset it in the program.</p>");
                         //close the program to stall the user.
                         SwingUtilities.invokeLater(()-> {
                             gui.dispose();

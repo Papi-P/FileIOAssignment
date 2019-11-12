@@ -33,6 +33,7 @@ public class GUI extends JFrame {
     JPanel loginPanel = new JPanel();
     JPanel registerPanel = new JPanel();
 
+    //login components
     JLabel loginNameLabel = new JLabel("Username:");
     public JLabel loginNameErrorLabel = new JLabel("");
     public InputField loginNameField = new InputField(100, 25, "Enter username here");
@@ -51,32 +52,69 @@ public class GUI extends JFrame {
             .setHoverColor(Color.decode("#38A1F3").darker())
             .setFg(Color.WHITE);
 
-    InputButton resetButton = new InputButton(60, 25) {
+    InputButton findNameButton = new InputButton(60, 25) {
         @Override
         public void onClick() {
-            String username = loginNameField.getText();
-            if(User.hasUserByName(username)){
-                User.resetPassword(User.getUserByName(username));
-            } else {
-                System.out.println("No user by that name");
+            String email = (String) JOptionPane.showInputDialog(null, "Enter your email", "Forgot Username", JOptionPane.PLAIN_MESSAGE);
+            if (User.hasUserByEmail(email)) {
+                JOptionPane.showMessageDialog(null, "Your email is linked to the username \"" + User.getUserByEmail(email).getUsername() + "\"", "Forgot Username", JOptionPane.INFORMATION_MESSAGE);
+            } else if (email != null) {
+                JOptionPane.showMessageDialog(null, "No account is linked to this email", "Forgot Username", JOptionPane.INFORMATION_MESSAGE);
             }
+
         }
-    }.setText("Reset Password")
+    }.setText("Forgot Username")
             .setAntialiased(true)
             .setCurve(15)
             .setBg(Color.decode("#38A1F3"))
             .setHoverColor(Color.decode("#38A1F3").darker())
             .setFg(Color.WHITE);
 
+    InputButton resetButton = new InputButton(60, 25) {
+        @Override
+        public void onClick() {
+            String username = loginNameField.getText();
+            //if the name in the login field exists, reset that password. If not, prompt the user to enter their username and then try to reset it
+            if (User.hasUserByName(username)) {
+                User.resetPassword(User.getUserByName(username));
+            } else {
+                username = (String) JOptionPane.showInputDialog(null, "Enter your username", "Forgot Password", JOptionPane.PLAIN_MESSAGE, null, null, username);
+                if (User.hasUserByName(username)) {
+                    User.resetPassword(User.getUserByName(username));
+                } else if (username != null) {
+                    JOptionPane.showMessageDialog(null, "No user found by that name.", "Error", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        }
+    }.setText("Forgot Password")
+            .setAntialiased(true)
+            .setCurve(15)
+            .setBg(Color.decode("#38A1F3"))
+            .setHoverColor(Color.decode("#38A1F3").darker())
+            .setFg(Color.WHITE);
+
+    //register components
     JLabel registerNameLabel = new JLabel("Enter your username:");
     public JLabel registerNameErrorLabel = new JLabel("");
-    public InputField registerNameField = new InputField(100, 25, "Enter username here");
+    public InputField registerNameField = new InputField(200, 25, "Enter username here");
+
     JLabel registerEmailLabel = new JLabel("Enter your email:");
     public JLabel registerEmailErrorLabel = new JLabel("");
-    public InputField registerEmailField = new InputField(100, 25, "Enter email here");
+    public InputField registerEmailField = new InputField(200, 25, "Enter email here");
+
     JLabel registerPasswordLabel = new JLabel("Enter your password:");
     public JLabel registerPasswordErrorLabel = new JLabel("");
-    public InputPasswordField registerPasswordField = new InputPasswordField(100, 25, "Enter password here");
+    public InputPasswordField registerPasswordField = new InputPasswordField(200, 25, "Enter password here");
+
+    JLabel registerFirstNameLabel = new JLabel("Enter your first name:");
+    public JLabel registerFirstNameErrorLabel = new JLabel("");
+    //add restriction to prevent spaces. TODO: rewrite InputField to add a "alphanumeric only" option instead
+    public InputField registerFirstNameField = new InputField(100, 25, "Enter first name here").addRestriction(' ', 0);
+
+    JLabel registerLastNameLabel = new JLabel("Enter your last name:");
+    public JLabel registerLastNameErrorLabel = new JLabel("");
+    //add restriction to prevent spaces. TODO: rewrite InputField to add a "alphanumeric only" option instead
+    public InputField registerLastNameField = new InputField(100, 25, "Enter last name here").addRestriction(' ', 0);;
     InputButton registerButton = new InputButton(60, 25) {
         @Override
         public void onClick() {
@@ -94,6 +132,7 @@ public class GUI extends JFrame {
      * Default constructor
      */
     public GUI() {
+        //init the GUI from various methods
         init();
         initLayout();
         initLogin();
@@ -102,9 +141,13 @@ public class GUI extends JFrame {
     }
 
     private void init() {
+        //set the size of the GUI
         this.setSize(Toolkit.getDefaultToolkit().getScreenSize().width / 2, Toolkit.getDefaultToolkit().getScreenSize().height / 2);
         this.setResizable(false);
+        //center the GUI
         this.setLocationRelativeTo(null);
+
+        //ask for confirmation when closing
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         this.addWindowListener(new WindowAdapter() {
             @Override
@@ -121,110 +164,120 @@ public class GUI extends JFrame {
     }
 
     private void initLayout() {
+        //set the LayoutManager
         this.setLayout(gbl);
         gbl.columnWeights = new double[]{1};
         gbl.rowWeights = new double[]{1};
-        //gbl.columnWidths = new int[]{622, 288};
     }
 
     private void initLogin() {
+        //configure the loginPanel and its components
         loginPanel.setSize(this.getSize());
         GridBagLayout loginLayout = new GridBagLayout();
-        //loginLayout.columnWeights = new double[]{0.2, 0.2, 1, 0.2, 0.2};
         loginPanel.setLayout(loginLayout);
         GridBagConstraints loginConstraints = new GridBagConstraints();
-        loginConstraints.insets = new Insets(0, 0, 0, 0);
+        loginConstraints.insets = new Insets(5, 0, 0, 10);
 
         Font errorFont = new Font("Dialog", (Font.BOLD | Font.ITALIC), 9);
         loginConstraints.gridy = 0;
         loginConstraints.gridx = 1;
-        loginConstraints.insets = new Insets(5, 0, 0, 60);
 
         loginNameErrorLabel.setFont(errorFont);
         loginNameErrorLabel.setForeground(Color.RED);
         loginPanel.add(loginNameErrorLabel, loginConstraints);
 
-        loginConstraints.insets = new Insets(5, 0, 0, 10);
         loginConstraints.gridx = 3;
 
         loginPasswordErrorLabel.setFont(errorFont);
         loginPasswordErrorLabel.setForeground(Color.RED);
         loginPanel.add(loginPasswordErrorLabel, loginConstraints);
 
-
         loginConstraints.gridx = 0;
         loginConstraints.gridy = 1;
         loginPanel.add(loginNameLabel, loginConstraints);
         loginConstraints.gridx++;
-        loginConstraints.insets = new Insets(5, 0, 0, 60);
         loginPanel.add(loginNameField, loginConstraints);
 
         loginConstraints.gridx++;
-        loginConstraints.insets = new Insets(5, 0, 0, 10);
         loginPanel.add(loginPasswordLabel, loginConstraints);
         loginConstraints.gridx++;
         loginPanel.add(loginPasswordField, loginConstraints);
         loginConstraints.gridy++;
-        loginConstraints.gridx=1;
+        loginConstraints.gridx = 1;
+        loginPanel.add(findNameButton, loginConstraints);
+        loginConstraints.gridx = 3;
         loginPanel.add(resetButton, loginConstraints);
-        loginConstraints.gridx=2;
+        loginConstraints.gridy = 3;
+        loginConstraints.gridx = 2;
         loginPanel.add(loginButton, loginConstraints);
     }
 
     private void initRegister() {
+        //configure the registerPanel and its components
         GridBagLayout registerLayout = new GridBagLayout();
         registerPanel.setLayout(registerLayout);
         GridBagConstraints registerConstraints = new GridBagConstraints();
 
-        registerConstraints.insets = new Insets(0, 0, 0, 0);
-
-        registerConstraints.gridx = 1;
-        registerConstraints.gridy = 0;
+        registerConstraints.insets = new Insets(5, 0, 0, 10);
 
         Font errorFont = new Font("Dialog", (Font.BOLD | Font.ITALIC), 9);
 
-        registerNameErrorLabel.setForeground(Color.RED);
-        registerNameErrorLabel.setFont(errorFont);
-        registerPanel.add(registerNameErrorLabel, registerConstraints);
         registerConstraints.gridx = 3;
-        registerEmailErrorLabel.setForeground(Color.RED);
-        registerEmailErrorLabel.setFont(errorFont);
-        registerPanel.add(registerEmailErrorLabel, registerConstraints);
+
         registerConstraints.gridx = 5;
-        registerPasswordErrorLabel.setForeground(Color.RED);
-        registerPasswordErrorLabel.setFont(errorFont);
-        registerPanel.add(registerPasswordErrorLabel, registerConstraints);
 
         registerConstraints.gridx = 0;
-        registerConstraints.gridy++;
-
-        registerConstraints.insets = new Insets(5, 0, 0, 10);
+        registerConstraints.gridy = 0;
         registerPanel.add(registerNameLabel, registerConstraints);
         registerConstraints.gridx++;
         registerPanel.add(registerNameField, registerConstraints);
         registerConstraints.gridx++;
+        registerNameErrorLabel.setForeground(Color.RED);
+        registerNameErrorLabel.setFont(errorFont);
+        registerPanel.add(registerNameErrorLabel, registerConstraints);
+
+        registerConstraints.gridy++;
+        registerConstraints.gridx = 0;
         registerPanel.add(registerEmailLabel, registerConstraints);
         registerConstraints.gridx++;
         registerPanel.add(registerEmailField, registerConstraints);
         registerConstraints.gridx++;
+        registerEmailErrorLabel.setForeground(Color.RED);
+        registerEmailErrorLabel.setFont(errorFont);
+        registerPanel.add(registerEmailErrorLabel, registerConstraints);
+
+        registerConstraints.gridy++;
+        registerConstraints.gridx = 0;
         registerPanel.add(registerPasswordLabel, registerConstraints);
         registerConstraints.gridx++;
         registerPanel.add(registerPasswordField, registerConstraints);
+        registerConstraints.gridx++;
+        registerPasswordErrorLabel.setForeground(Color.RED);
+        registerPasswordErrorLabel.setFont(errorFont);
+        registerPanel.add(registerPasswordErrorLabel, registerConstraints);
+
+        registerConstraints.gridy++;
+        registerConstraints.gridx = 0;
+        registerPanel.add(registerFirstNameLabel, registerConstraints);
+        registerConstraints.gridx++;
+        registerPanel.add(registerFirstNameField, registerConstraints);
+        registerConstraints.gridx++;
+        registerPanel.add(registerLastNameLabel, registerConstraints);
+        registerConstraints.gridx++;
+        registerPanel.add(registerLastNameField, registerConstraints);
+
         registerConstraints.gridx = 4;
         registerConstraints.gridy++;
         registerPanel.add(registerButton, registerConstraints);
     }
 
     private void initComponents() {
+        //add the components to the GUI
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.weightx = 1;
         gbc.weighty = 1;
         this.add(loginPanel, gbc);
-        // gbc.gridy++;
-        // gbc.fill = GridBagConstraints.HORIZONTAL;
-        // this.add(new JSeparator(SwingConstants.HORIZONTAL));
-        // gbc.fill = GridBagConstraints.NONE;
         gbc.gridy++;
         this.add(registerPanel, gbc);
     }

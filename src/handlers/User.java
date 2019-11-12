@@ -22,15 +22,19 @@ import javax.mail.MessagingException;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 /*
     @author Daniel Allen
     7-Nov-2019
  */
 public final class User {
+
     private int failedAttempts;
     private static ArrayList<User> allUsers = new ArrayList<>();
-    private final String name,
+    private final String username,
+            firstName,
+            lastName,
             email,
             encryptedPassword;
 
@@ -43,14 +47,22 @@ public final class User {
         }
     }
 
-    public User(String name, String email, String password) {
-        this.name = name;
+    public User(String username, String email, String password, String firstName, String lastName) {
+        this.username = username;
         this.email = email;
         this.encryptedPassword = password;
+        this.firstName = firstName == null ? "" : firstName;
+        this.lastName = lastName == null ? "" : lastName;
     }
 
-    public final String getName() {
-        return this.name;
+    public final String[] getName(){
+        return new String[] {
+            firstName,
+            lastName
+        };
+    }
+    public final String getUsername() {
+        return this.username;
     }
 
     public final String getEncryptedPassword() {
@@ -60,18 +72,22 @@ public final class User {
     public final String getEmail() {
         return email;
     }
-    public void fail(){
+
+    public void fail() {
         this.failedAttempts++;
     }
-    public int getAttempts(){
+
+    public int getAttempts() {
         return this.failedAttempts;
     }
-    public void success(){
+
+    public void success() {
         this.failedAttempts = 0;
     }
+
     public static final User getUserByName(String username) {
         for (User u : allUsers) {
-            if (u.getName().equalsIgnoreCase(username)) {
+            if (u.getUsername().equalsIgnoreCase(username)) {
                 return u;
             }
         }
@@ -80,7 +96,7 @@ public final class User {
 
     public static final User getUserByEmail(String email) {
         for (User u : allUsers) {
-            if (u.getName().equalsIgnoreCase(email)) {
+            if (u.getEmail().equalsIgnoreCase(email)) {
                 return u;
             }
         }
@@ -89,7 +105,7 @@ public final class User {
 
     public static final boolean hasUserByName(String username) {
         for (User u : allUsers) {
-            if (u.getName().equalsIgnoreCase(username)) {
+            if (u.getUsername().equalsIgnoreCase(username)) {
                 return true;
             }
         }
@@ -106,7 +122,7 @@ public final class User {
     }
 
     public static final boolean addUserIfAbsent(User u) {
-        if (hasUserByName(u.getName())) {
+        if (hasUserByName(u.getUsername())) {
             return false;
         }
         if (hasUserByEmail(u.getEmail())) {
@@ -119,11 +135,11 @@ public final class User {
         BufferedReader br = new BufferedReader(new FileReader("src\\fileioassignment\\users.dat"));
         String line = "";
         while ((line = br.readLine()) != null) {
-            String[] components = line.split("\\s");
-            if (components.length != 3) {
+            String[] components = line.split(" ");
+            if (components.length != 5) {
                 continue;
             }
-            User cur = new User(components[0], components[1], components[2]);
+            User cur = new User(components[0], components[1], components[2], components[3], components[4]);
             addUserIfAbsent(cur);
         }
         br.close();
@@ -131,12 +147,13 @@ public final class User {
 
     public static final void addUserToFile(User u) throws IOException {
         FileWriter fw = new FileWriter("src\\fileioassignment\\users.dat", true);
-        fw.write(u.getName() + " " + u.getEmail() + " " + u.getEncryptedPassword() + System.lineSeparator());
+        fw.write(u.getUsername() + " " + u.getEmail() + " " + u.getEncryptedPassword() + " " + u.getName()[0] + " " + u.getName()[1] + System.lineSeparator());
         fw.close();
     }
 
     public static final void resetPassword(User u) {
         JDialog resetDialog = new JDialog();
+        JPanel resetPanel = new JPanel();
         resetDialog.setModal(true);
         resetDialog.setTitle("Reset Password");
         byte[] bytes = new byte[8];
@@ -144,14 +161,13 @@ public final class User {
             bytes[i] = (byte) Math.floor(Math.random() * 255);
         }
         String key = Encrypt.bytesToHex(bytes);
-        System.out.println(key);
         try {
             EmailService.sendEmail(u.getEmail(), "Reset Password Confirmation", "<html><h1>Reset Password</h1><p>If you did not request this email, it can be ignored.</p><br><p>If not, your key to reset your password is: <b>" + key + "</b></html>");
         } catch (IOException | MessagingException ex) {
             Logger.getLogger(FileIOAssignment.class.getName()).log(Level.SEVERE, null, ex);
         }
-        JLabel informOfEmail = new JLabel("An email has been sent to the email registered to this account with a key. Please enter it below to reset your password.");
-        InputPasswordField keyField = new InputPasswordField(100, 100, "Key");
+        JLabel informOfEmail = new JLabel("<html>An email was sent to your email, " + censorEmail(u.email, 3) + "<br>Please enter your key below to reset your password.</html>");
+        InputPasswordField keyField = new InputPasswordField(160, 25, "Key");
         InputButton submitButton = new InputButton(60, 25) {
             @Override
             public void onClick() {
@@ -162,27 +178,27 @@ public final class User {
                         String input = "";
                         while (!validPassword) {
                             validPassword = true;
-                            input = JOptionPane.showInputDialog(resetDialog, "Enter your new password", "Reset Password", HEIGHT);
+                            input = JOptionPane.showInputDialog(resetPanel, "Enter your new password", "Reset Password", HEIGHT);
                             if (input.trim().isEmpty()) {
                                 validPassword = false;
                             } else if (Verify.badPasswords.contains(input) || input.length() < 5) {
                                 validPassword = false;
                             }
                             if (!validPassword) {
-                                JOptionPane.showMessageDialog(resetDialog, "This password is too weak. Please create another one.", "Weak Password", JOptionPane.ERROR_MESSAGE);
+                                JOptionPane.showMessageDialog(resetPanel, "This password is too weak. Please create another one.", "Weak Password", JOptionPane.ERROR_MESSAGE);
                             }
                         }
                         User.removeUser(u);
-                        User userWithNewPassword = new User(u.getName(), u.getEmail(), Encrypt.sha256(input));
+                        User userWithNewPassword = new User(u.getUsername(), u.getEmail(), Encrypt.sha256(input), u.getName()[0], u.getName()[1]);
                         allUsers.add(userWithNewPassword);
                         User.addUserToFile(userWithNewPassword);
-                        JOptionPane.showMessageDialog(resetDialog, "Password was reset", "Reset Password", JOptionPane.INFORMATION_MESSAGE);
+                        JOptionPane.showMessageDialog(resetPanel, "Password was reset", "Reset Password", JOptionPane.INFORMATION_MESSAGE);
                         resetDialog.dispose();
                     } catch (IOException ex) {
                         Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 } else {
-                    JOptionPane.showMessageDialog(resetDialog, "Invalid key. Check your email for the correct one.", "Invalid Key", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(resetPanel, "Invalid key. Check your email for the correct one.", "Invalid Key", JOptionPane.ERROR_MESSAGE);
                     keyField.setText("");
                 }
             }
@@ -193,15 +209,18 @@ public final class User {
                 .setHoverColor(Color.decode("#38A1F3").darker())
                 .setFg(Color.WHITE);
 
-        resetDialog.setLayout(new GridBagLayout());
+        resetPanel.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-
-        resetDialog.add(informOfEmail, gbc);
+        gbc.weightx = 1;
+        gbc.weighty = 1;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        resetPanel.add(informOfEmail, gbc);
         gbc.gridy++;
-        resetDialog.add(keyField, gbc);
+        resetPanel.add(keyField, gbc);
         gbc.gridy++;
-        resetDialog.add(submitButton, gbc);
-        gbc.gridy++;
+        resetPanel.add(submitButton, gbc);
+        resetDialog.add(resetPanel);
         resetDialog.setSize(600, 400);
         resetDialog.setLocationRelativeTo(null);
         resetDialog.setVisible(true);
@@ -211,7 +230,7 @@ public final class User {
 
         try {
             File f = new File("src\\fileioassignment\\users.dat");
-            List<String> newFile = Files.lines(f.toPath()).filter(line -> !line.startsWith(user.getName() + " ")).collect(Collectors.toList());
+            List<String> newFile = Files.lines(f.toPath()).filter(line -> !line.startsWith(user.getUsername() + " ")).collect(Collectors.toList());
             FileWriter fw = new FileWriter(f);
             for (String s : newFile) {
                 System.out.println(s);
@@ -224,5 +243,21 @@ public final class User {
             Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
         }
 
+    }
+
+    public static String censorEmail(String email, int count) {
+        StringBuilder sb = new StringBuilder();
+        String[] parts = email.split("@");
+        if (parts.length != 2) {
+            return "Invalid email";
+        }
+        if (count < 0 || count > parts[0].length()) {
+            throw new IllegalArgumentException("Count must be greater than 0 and cannot be greater than the length of the email");
+        }
+        for (int i = 0; i < parts[0].length() - count; i++) {
+            sb.append("*");
+        }
+        sb.append(email.substring(parts[0].length() - count));
+        return sb.toString();
     }
 }

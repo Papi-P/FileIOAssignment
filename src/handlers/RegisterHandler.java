@@ -34,7 +34,9 @@ public final class RegisterHandler {
     //a-z = 97-122
     public boolean register() {
         String name = gui.registerNameField.getText(),
-                email = gui.registerEmailField.getText();
+                email = gui.registerEmailField.getText(),
+                fname = gui.registerFirstNameField.getText(),
+                lname = gui.registerLastNameField.getText();
         //validate name
         boolean namevalid = true;
         if (name.contains(" ") || name.contains("\\s")) {
@@ -75,8 +77,7 @@ public final class RegisterHandler {
             boolean hasAt = false;
             for (int i = 0; i < email.toCharArray().length; i++) {
                 char c = email.toCharArray()[i];
-                //between A-Z            between a-z                between 0-9                   in allowedSpecial
-                //
+                //          between A-Z               between a-z              between 0-9                 in allowedSpecial
                 if (!((c <= 'Z' && c >= 'A') || (c <= 'z' && c >= 'a') || (c <= '9' && c >= '0') || allowedSpecial.indexOf(c) != -1)) {
                     gui.registerEmailErrorLabel.setText("Invalid characters");
                     gui.registerEmailField.setBorderColor(Color.RED);
@@ -138,7 +139,52 @@ public final class RegisterHandler {
             gui.registerPasswordErrorLabel.setText("Password is too weak!");
             gui.registerPasswordField.setBorderColor(Color.RED);
             passwordvalid = false;
+        } else {
+            //max sequential characters in a row
+            final int maxInARow = 3;
+            int curInARow = 0;
+            char pre = 0;
+            int scenario = 0;
+            //prevent sequential characters
+            for (int i = 0; i < password.length(); i++) {
+                char cur = password.charAt(i);
+                //prevent increasing characters
+                if (cur - pre == 1) {
+                    if (scenario == 1) {
+                        curInARow++;
+                    } else {
+                        scenario = 1;
+                        curInARow = 0;
+                    }
+                }
+                //prevent decreasing characters
+                else if (pre - cur == 1) {
+                    if (scenario == -1) {
+                        curInARow++;
+                    } else {
+                        scenario = -1;
+                        curInARow = 0;
+                    }
+                }
+                //prevent repeating characters
+                else if (pre - cur == 0) {
+                    if (scenario == 0) {
+                        curInARow++;
+                    } else {
+                        scenario = 0;
+                        curInARow = 0;
+                    }
+                }
+                pre = cur;
+                if (curInARow >= maxInARow) {
+                    gui.registerPasswordErrorLabel.setText("Avoid sequential characters!");
+                    gui.registerPasswordField.setBorderColor(Color.RED);
+                    passwordvalid = false;
+                    break;
+                }
+            }
         }
+
         if (!namevalid || !emailvalid || !passwordvalid) {
             if (namevalid) {
                 gui.registerNameErrorLabel.setText("");
@@ -153,7 +199,7 @@ public final class RegisterHandler {
                 gui.registerPasswordField.setBorderColor(Color.GREEN.darker());
             }
         } else if (namevalid && emailvalid && passwordvalid) {
-            User user = new User(name, email, Encrypt.sha256(password));
+            User user = new User(name, email, Encrypt.sha256(password), fname, lname);
             password = null;
             boolean success = addUserIfAbsent(user);
             if (success) {
@@ -165,6 +211,10 @@ public final class RegisterHandler {
                     gui.registerEmailField.setBorderColor(Color.BLACK);
                     gui.registerPasswordField.setText("");
                     gui.registerPasswordField.setBorderColor(Color.BLACK);
+                    gui.registerFirstNameField.setText("");
+                    gui.registerFirstNameField.setBorderColor(Color.BLACK);
+                    gui.registerLastNameField.setText("");
+                    gui.registerLastNameField.setBorderColor(Color.BLACK);
                 } catch (IOException ex) {
                     success = false;
                 }
